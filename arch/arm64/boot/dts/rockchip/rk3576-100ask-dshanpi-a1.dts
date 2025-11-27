@@ -768,7 +768,7 @@
 		interrupt-parent = <&gpio0>;
 		interrupts = <RK_PC7 IRQ_TYPE_LEVEL_LOW>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&gmac0_rst &gmac0_int>;
+		pinctrl-0 = <&gmac1_rst &gmac1_int>;
 		/* Reset time is 20ms, 100ms for yt8521 */
 		reset-assert-us = <20000>;
 		reset-deassert-us = <100000>;
