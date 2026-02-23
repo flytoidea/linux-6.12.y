@@ -94,40 +94,34 @@
         vin-supply = <&dc_12v>;
     };
 
-    vcc5v0_usb: vcc5v0-usb-regulator {
+    vcc5v0_usb: vcc5v0-usb {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_usb";
         regulator-always-on;
         regulator-boot-on;
-        enable-active-high;
-        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_host_en0>;
         regulator-min-microvolt = <5000000>;
         regulator-max-microvolt = <5000000>;
-        vin-supply = <&dc_12v>;
+        vin-supply = <&vcc5v0_sys>;
     };
 
-    vcc5v0_host: vcc5v0-host-regulator {
+    vcc5v0_host: vcc5v0-host {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_host";
         enable-active-high;
-        gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
+        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
         pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_host_en1>;
-        regulator-boot-on;
+        pinctrl-0 = <&vcc5v0_host_en>;
         regulator-always-on;
-        regulator-min-microvolt = <5000000>;
-        regulator-max-microvolt = <5000000>;
         vin-supply = <&vcc5v0_usb>;
     };
 
-    vcc5v0_otg: vcc5v0-otg-regulator {
+    vcc5v0_otg: vcc5v0-otg {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_otg";
-        regulator-min-microvolt = <5000000>;
-        regulator-max-microvolt = <5000000>;
         enable-active-high;
+        gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vcc5v0_otg_en>;
         vin-supply = <&vcc5v0_usb>;
     };
 
@@ -660,30 +654,6 @@
     status = "okay";
 };
 
-&rockchip_suspend {
-    status = "okay";
-};
-
-/* USB 3.0组合物理层接口0 */
-&combphy0_us {
-    status = "okay";
-};
-
-/* USB 3.0组合物理层接口1 */
-&combphy1_usq {
-    status = "okay";
-};
-
-/* PCIe/SATA组合物理层接口2 */
-&combphy2_psq {
-    status = "okay";
-};
-
-/* 视频物理层接口0 */
-&video_phy0 {
-    status = "okay";
-};
-
 /* eMMC控制器 */
 &sdhci {
     bus-width = <8>;
@@ -795,11 +765,10 @@
 
     /* USB电源引脚配置 */
     usb {
-        vcc5v0_host_en0: vcc5v0-host-en0 {
+        vcc5v0_host_en: vcc5v0-host-en {
             rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
         };
-
-        vcc5v0_host_en1: vcc5v0-host-en1 {
+        vcc5v0_otg_en: vcc5v0-otg-en {
             rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
         };
     };
@@ -861,105 +830,52 @@
     status = "okay";
 };
 
-&reserved_memory {
-    ramoops: ramoops@110000 {
-        compatible = "ramoops";
-        reg = <0x0 0x110000 0x0 0xf0000>;
-        record-size = <0x20000>;
-        console-size = <0x80000>;
-        ftrace-size = <0x00000>;
-        pmsg-size = <0x50000>;
-    };
-
-    rknpu_reserved: rknpu {
-        compatible = "shared-dma-pool";
-        inactive;
-        reusable;
-        size = <0x0 0x20000000>;
-        alignment = <0x0 0x1000>;
-    };
-};
-
 /* SATA2接口 */
 &sata2 {
     status = "okay";
 };
 
-/* USB2 PHY0 */
+&usb2phy0_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+&usb2phy0_otg {
+	status = "okay";
+};
+
+&usb2phy1_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+&usb2phy1_otg {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
 &usb2phy0 {
-    status = "okay";
-    u2phy0_host: host-port {
-        phy-supply = <&vcc5v0_host>;
-        status = "okay";
-    };
-    u2phy0_otg: otg-port {
-        vbus-supply = <&vcc5v0_otg>;
-        status = "okay";
-    };
+	status = "okay";
 };
 
-/* USB2 PHY1 */
 &usb2phy1 {
-    status = "okay";
-    u2phy1_host: host-port {
-        phy-supply = <&vcc5v0_host>;
-        status = "okay";
-    };
-    u2phy1_otg: otg-port {
-        phy-supply = <&vcc5v0_host>;
-        status = "okay";
-    };
-};
-
-/* USB3.0 （OTG）控制器*/
-&usbdrd30 {
-    status = "okay";
-};
-
-/* USB3.0 （OTG）控制器的DWC3核心 */
-&usbdrd_dwc3 {
-    dr_mode = "otg";
-    extcon = <&usb2phy0>;
-    phys = <&u2phy0_otg>, <&combphy0_us 4>;
-    phy-names = "usb2-phy", "usb3-phy";
-    maximum-speed = "super-speed";
-    status = "okay";
-};
-
-/* USB3.0主机控制器 */
-&usbhost30 {
-    status = "okay";
-};
-
-/* USB3.0主机控制器的DWC3核心 */
-&usbhost_dwc3 {
-    dr_mode = "host";
-    phys = <&u2phy0_host>, <&combphy1_usq 4>;
-    phy-names = "usb2-phy", "usb3-phy";
-    maximum-speed = "super-speed";
-    status = "okay";
+	status = "okay";
 };
 
 &usb_host0_ehci {
-    phys = <&u2phy1_otg>;
-    phy-names = "usb2-phy";
-    status = "okay";
+	status = "okay";
 };
+
 &usb_host0_ohci {
-    phys = <&u2phy1_otg>;
-    phy-names = "usb2-phy";
-    status = "okay";
+	status = "okay";
 };
 
 &usb_host1_ehci {
-    phys = <&u2phy1_host>;
-    phy-names = "usb2-phy";
-    status = "okay";
+	status = "okay";
 };
+
 &usb_host1_ohci {
-    phys = <&u2phy1_host>;
-    phy-names = "usb2-phy";
-    status = "okay";
+	status = "okay";
 };
 
 /* SPI NOR闪存控制器 */
