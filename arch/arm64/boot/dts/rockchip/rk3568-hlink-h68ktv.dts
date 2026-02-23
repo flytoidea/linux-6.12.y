@@ -605,20 +605,13 @@
 };
 
 &vop {
-	status = "okay";
-	assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
-	assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
+    status = "okay";
+    assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
+    assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
 };
 
 &vop_mmu {
-	status = "okay";
-};
-
-&hdmi_in {
-	hdmi_in_vp0: endpoint@0 {
-		reg = <0>;
-		remote-endpoint = <&vp0_out_hdmi>;
-	};
+    status = "okay";
 };
 
 &vp0 {
@@ -628,14 +621,20 @@
         };
 };
 
+&hdmi_in {
+    hdmi_in_vp0: endpoint {
+        remote-endpoint = <&vp0_out_hdmi>;
+    };
+};
+
 &hdmi_out {
-	hdmi_out_con: endpoint {
-		remote-endpoint = <&hdmi_con_in>;
-	};
+    hdmi_out_con: endpoint {
+        remote-endpoint = <&hdmi_con_in>;
+    };
 };
 
 &hdmi_sound {
-	status = "okay";
+    status = "okay";
 };
 
 /* 温度传感器模数转换器 */
@@ -711,20 +710,6 @@
 
         soc_slppin_rst: soc_slppin_rst {
             rockchip,pins = <0 RK_PA2 2 &pcfg_pull_none>;
-        };
-    };
-
-    tsadc {
-
-        tsadc_shutorg: tsadc-shutorg {
-            rockchip,pins = <0 RK_PA1 2 &pcfg_pull_none>;
-        };
-    };
-
-    gpio-func {
-    
-        tsadc_gpio_func: tsadc-gpio-func {
-            rockchip,pins = <0 RK_PA1 0 &pcfg_pull_none>;
         };
     };
 
