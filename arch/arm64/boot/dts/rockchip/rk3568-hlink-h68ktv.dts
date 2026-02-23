@@ -51,6 +51,17 @@
         };
     };
 
+	hdmi-con {
+		compatible = "hdmi-connector";
+		type = "a";
+
+		port {
+			hdmi_con_in: endpoint {
+				remote-endpoint = <&hdmi_out_con>;
+			};
+		};
+	};
+
     /* 电源/电压调节器定义 */
     dc_12v: dc-12v {
         compatible = "regulator-fixed";
@@ -261,17 +272,6 @@
     rgmii_phy1: phy@0 {
         compatible = "ethernet-phy-ieee802.3-c22";
         reg = <0x0>;
-    };
-};
-
-hdmi-con {
-    compatible = "hdmi-connector";
-    type = "a";
-
-    port {
-        hdmi_con_in: endpoint {
-                remote-endpoint = <&hdmi_out_con>;
-        };
     };
 };
 
