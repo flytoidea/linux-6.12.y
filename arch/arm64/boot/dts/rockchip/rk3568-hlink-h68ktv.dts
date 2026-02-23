@@ -264,9 +264,22 @@
     };
 };
 
+hdmi-con {
+    compatible = "hdmi-connector";
+    type = "a";
+
+    port {
+        hdmi_con_in: endpoint {
+                remote-endpoint = <&hdmi_out_con>;
+        };
+    };
+};
+
 /* HDMI接口配置 */
 &hdmi {
     status = "okay";
+    avdd-0v9-supply = <&vdda0v9_image>;
+    avdd-1v8-supply = <&vcca1v8_image>;
     rockchip,phy-table =
         <92812500  0x8009 0x0000 0x0270>,
         <165000000 0x800b 0x0000 0x026d>,
@@ -274,25 +287,6 @@
         <297000000 0x800b 0x0000 0x01ad>,
         <594000000 0x8029 0x0000 0x0088>,
         <000000000 0x0000 0x0000 0x0000>;
-};
-
-&hdmi_in_vp0 {
-    status = "okay";
-};
-
-/* HDMI音频 */
-&hdmi_sound {
-    status = "okay";
-    compatible = "simple-audio-card";
-    simple-audio-card,format = "i2s";
-    simple-audio-card,mclk-fs = <128>;
-    simple-audio-card,name = "rockchip,hdmi";
-    simple-audio-card,cpu {
-        sound-dai = <&i2s0_8ch>;
-    };
-    simple-audio-card,codec {
-        sound-dai = <&hdmi>;
-    };
 };
 
 /* I2C0总线配置 */
@@ -615,6 +609,40 @@
     };
 };
 
+&vop {
+	status = "okay";
+	assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
+	assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
+};
+
+&vop_mmu {
+	status = "okay";
+};
+
+&hdmi_in {
+	hdmi_in_vp0: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&vp0_out_hdmi>;
+	};
+};
+
+&vp0 {
+        vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
+                reg = <ROCKCHIP_VOP2_EP_HDMI0>;
+                remote-endpoint = <&hdmi_in_vp0>;
+        };
+};
+
+&hdmi_out {
+	hdmi_out_con: endpoint {
+		remote-endpoint = <&hdmi_con_in>;
+	};
+};
+
+&hdmi_sound {
+	status = "okay";
+};
+
 /* 温度传感器模数转换器 */
 &tsadc {
     status = "okay";
@@ -633,11 +661,6 @@
 
 &rockchip_suspend {
     status = "okay";
-};
-
-&route_hdmi {
-    status = "okay";
-    connect = <&vp0_out_hdmi>;
 };
 
 /* USB 3.0组合物理层接口0 */
@@ -935,20 +958,6 @@
 &usb_host1_ohci {
     phys = <&u2phy1_host>;
     phy-names = "usb2-phy";
-    status = "okay";
-};
-
-/* VOP（视频输出处理器） */
-&vop {
-    status = "okay";
-    assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
-    assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
-    support-multi-area;
-    disable-win-move;
-};
-
-/* VOP内存管理单元 */
-&vop_mmu {
     status = "okay";
 };
 
