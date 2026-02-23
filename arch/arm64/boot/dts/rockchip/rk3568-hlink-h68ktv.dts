@@ -676,7 +676,7 @@
     sd-uhs-sdr104;
     mmc-pwrseq = <&sdio_pwrseq>;
     pinctrl-names = "default";
-    pinctrl-0 = <&sdmmc2_bus4 &sdmmc2_cmd &sdmmc2_clk>;
+    pinctrl-0 = <&sdmmc2m0_bus4 &sdmmc2m0_cmd &sdmmc2m0_clk>;
     #address-cells = <1>;
     #size-cells = <0>;
 
@@ -702,7 +702,7 @@
         };
 
         soc_slppin_gpio: soc_slppin_gpio {
-            rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_low_pull_down>;
+            rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_down>;
         };
 
         soc_slppin_slp: soc_slppin_slp {
@@ -728,12 +728,6 @@
         };
     };
 
-    pwm8 {
-        pwm8m0_pins: pwm8m0-pins {
-            rockchip,pins = <3 RK_PB1 5 &pcfg_pull_none>;
-        };
-    };
-
     leds {
         led_sata: led-sata-pin {
             rockchip,pins = <3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -741,18 +735,6 @@
 
         led_ssd: led-ssd-pin {
             rockchip,pins = <3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
-        };
-    };
-
-    hdmitx {
-        hdmitxm0-cec {
-            rockchip,pins = <4 RK_PD1 1 &pcfg_pull_none>;
-        };
-        hdmitx-scl {
-            rockchip,pins = <4 RK_PC7 1 &pcfg_pull_none>;
-        };
-        hdmitx-sda {
-            rockchip,pins = <4 RK_PD0 1 &pcfg_pull_none>;
         };
     };
 
@@ -776,38 +758,6 @@
     /* wifi引脚配置 */
     wifi_host_wake_irq: wifi-host-wake-irq {
             rockchip,pins = <3 RK_PD4 RK_FUNC_GPIO &pcfg_pull_down>;
-    };
-
-    sdmmc2 {
-        sdmmc2_bus4: sdmmc2-bus4-pins {
-            rockchip,pins =
-                <3 RK_PC6 3 &pcfg_pull_up_drv_level_2>,
-                <3 RK_PC7 3 &pcfg_pull_up_drv_level_2>,
-                <3 RK_PD0 3 &pcfg_pull_up_drv_level_2>,
-                <3 RK_PD1 3 &pcfg_pull_up_drv_level_2>;
-        };
-
-        sdmmc2_cmd: sdmmc2-cmd-pins {
-            rockchip,pins = <3 RK_PD2 3 &pcfg_pull_up_drv_level_2>;
-        };
-
-        sdmmc2_clk: sdmmc2-clk-pins {
-            rockchip,pins = <3 RK_PD3 3 &pcfg_pull_up_drv_level_2>;
-        };
-    };
-
-    uart8 {
-        uart8m0_xfer: uart8m0-xfer {
-            rockchip,pins =
-                <2 RK_PC6 2 &pcfg_pull_up>,
-                <2 RK_PC5 3 &pcfg_pull_up>;
-        };
-        uart8m0_ctsn: uart8m0-ctsn {
-            rockchip,pins = <2 RK_PB2 3 &pcfg_pull_none>;
-        };
-        uart8m0_rtsn: uart8m0-rtsn {
-            rockchip,pins = <2 RK_PB1 3 &pcfg_pull_none>;
-        };
     };
 
     /* wifi电源引脚配置 */
