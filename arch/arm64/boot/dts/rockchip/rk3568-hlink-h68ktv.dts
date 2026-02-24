@@ -109,7 +109,7 @@
         regulator-boot-on;
         regulator-min-microvolt = <5000000>;
         regulator-max-microvolt = <5000000>;
-        vin-supply = <&vcc5v0_sys>;
+        vin-supply = <&dc_12v>;
     };
 
     vcc5v0_host: vcc5v0-host {
@@ -185,6 +185,7 @@
         pinctrl-0 = <&wifi_enable_h>;
         reset-gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
         post-power-on-delay-ms = <200>;
+        status = "okay";
     };
 };
 
@@ -591,21 +592,16 @@
 
 &i2s1_8ch {
     status = "okay";
-    pinctrl-names = "default";
-    pinctrl-0 = <&i2s1m0_sclktx &i2s1m0_lrcktx &i2s1m0_sdi0 &i2s1m0_sdo0>;
 };
 
 /* 串口2 */
 &uart2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&uart2m0_xfer>;
     status = "okay";
 };
 
 /* UART8串口（带蓝牙）*/
 &uart8 {
     status = "okay";
-    pinctrl-names = "default";
     pinctrl-0 = <&uart8m0_xfer &uart8m0_ctsn &uart8m0_rtsn>;
     uart-has-rtscts;
 
@@ -788,7 +784,6 @@
     status = "okay";
 };
 
-
 /* USB部分 */
 &combphy0 {
     status = "okay";
@@ -800,13 +795,12 @@
 
 &usb_host0_xhci {
     status = "okay";
-    phys = <&u2phy0_otg>, <&combphy0 PHY_TYPE_USB3>;
+    phys = <&usb2phy0_otg>, <&combphy0 PHY_TYPE_USB3>;
     phy-names = "usb2-phy", "usb3-phy";
 };
 
 &usb_host1_xhci {
     status = "okay";
-    phys = <&u2phy1_host>, <&combphy1 PHY_TYPE_USB3>;
 };
 
 &usb2phy0_host {
@@ -815,6 +809,7 @@
 };
 
 &usb2phy0_otg {
+    phy-supply = <&vcc5v0_otg>;
     status = "okay";
 };
 
