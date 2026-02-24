@@ -137,12 +137,12 @@
         compatible = "regulator-fixed";
         regulator-name = "vcc3v3_pcie";
         enable-active-high;
-        gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
-        startup-delay-us = <5000>;
         regulator-min-microvolt = <3300000>;
         regulator-max-microvolt = <3300000>;
-        regulator-always-on;
-        regulator-boot-on;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vcc3v3_pcie_en_pin>;
+        gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+        startup-delay-us = <5000>;
         vin-supply = <&dc_12v>;
     };
 
@@ -602,6 +602,7 @@
 /* UART8串口（带蓝牙）*/
 &uart8 {
     status = "okay";
+    pinctrl-names = "default";
     pinctrl-0 = <&uart8m0_xfer &uart8m0_ctsn &uart8m0_rtsn>;
     uart-has-rtscts;
 
@@ -752,6 +753,15 @@
         };
     };
 
+    pcie {
+        pcie_reset_pin: pcie-reset-pin {
+            rockchip,pins = <2 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+        vcc3v3_pcie_en_pin: vcc3v3-pcie-en-pin {
+        rockchip,pins = <2 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+    };
+
     /* USB电源引脚配置 */
     usb {
         vcc5v0_host_en: vcc5v0-host-en {
@@ -854,14 +864,15 @@
 
 /* PCIe 3.0物理层接口 */
 &pcie30phy {
-    compatible = "rockchip,rk3568-pcie-phy";
     status = "okay";
 };
 
 /* PCIe 3.0 x2控制器 */
 &pcie3x2 {
-    rockchip,init-delay-ms = <100>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&pcie_reset_pin>;
     reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
     vpcie3v3-supply = <&vcc3v3_pcie>;
+    rockchip,init-delay-ms = <100>;
     status = "okay";
 };
