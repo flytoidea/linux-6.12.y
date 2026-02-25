@@ -48,7 +48,6 @@
         led-ssd {
             label = "ssd";
             gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
-            linux,default-trigger = "disk-activity";
             retain-state-suspended;
         };
     };
@@ -297,13 +296,6 @@
     status = "okay";
     avdd-0v9-supply = <&vdda0v9_image>;
     avdd-1v8-supply = <&vcca1v8_image>;
-    rockchip,phy-table =
-        <92812500  0x8009 0x0000 0x0270>,
-        <165000000 0x800b 0x0000 0x026d>,
-        <185625000 0x800b 0x0000 0x01ed>,
-        <297000000 0x800b 0x0000 0x01ad>,
-        <594000000 0x8029 0x0000 0x0088>,
-        <000000000 0x0000 0x0000 0x0000>;
 };
 
 /* I2C0总线配置 */
@@ -807,6 +799,7 @@
     status = "okay";
     phys = <&usb2phy0_otg>, <&combphy0 PHY_TYPE_USB3>;
     phy-names = "usb2-phy", "usb3-phy";
+    vbus-supply = <&vcc5v0_otg>;
 };
 
 &usb_host1_xhci {
@@ -819,7 +812,7 @@
 };
 
 &usb2phy0_otg {
-    phy-supply = <&vcc5v0_otg>;
+    phy-supply = <&vcc5v0_host>;
     status = "okay";
 };
 
