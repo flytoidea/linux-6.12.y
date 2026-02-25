@@ -48,6 +48,7 @@
         led-ssd {
             label = "ssd";
             gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
+            linux,default-trigger = "disk-activity";
             retain-state-suspended;
         };
     };
@@ -104,31 +105,36 @@
     vcc5v0_usb: vcc5v0-usb {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_usb";
-        regulator-always-on;
         regulator-boot-on;
+        regulator-always-on;
         regulator-min-microvolt = <5000000>;
         regulator-max-microvolt = <5000000>;
+        enable-active-high;
+        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vcc5v0_host_en0>;
         vin-supply = <&dc_12v>;
     };
 
     vcc5v0_host: vcc5v0-host {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_host";
-        enable-active-high;
-        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_host_en>;
+        regulator-boot-on;
         regulator-always-on;
+        regulator-min-microvolt = <5000000>;
+        regulator-max-microvolt = <5000000>;
+        enable-active-high;
+        gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vcc5v0_host_en1>;
         vin-supply = <&vcc5v0_usb>;
     };
 
     vcc5v0_otg: vcc5v0-otg {
         compatible = "regulator-fixed";
         regulator-name = "vcc5v0_otg";
-        enable-active-high;
-        gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_otg_en>;
+        regulator-min-microvolt = <5000000>;
+        regulator-max-microvolt = <5000000>;
         vin-supply = <&vcc5v0_usb>;
     };
 
@@ -756,10 +762,10 @@
 
     /* USB电源引脚配置 */
     usb {
-        vcc5v0_host_en: vcc5v0-host-en {
+        vcc5v0_host_en0: vcc5v0-host-en0 {
             rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
         };
-        vcc5v0_otg_en: vcc5v0-otg-en {
+        vcc5v0_host_en1: vcc5v0-host-en1 {
             rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
         };
     };
@@ -799,7 +805,7 @@
     status = "okay";
     phys = <&usb2phy0_otg>, <&combphy0 PHY_TYPE_USB3>;
     phy-names = "usb2-phy", "usb3-phy";
-    vbus-supply = <&vcc5v0_otg>;
+    extcon = <&usb2phy0>;
 };
 
 &usb_host1_xhci {
@@ -812,7 +818,7 @@
 };
 
 &usb2phy0_otg {
-    phy-supply = <&vcc5v0_host>;
+    phy-supply = <&vcc5v0_otg>;
     status = "okay";
 };
 
