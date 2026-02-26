@@ -1,7 +1,5 @@
 /dts-v1/;
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/leds/common.h>
-#include <dt-bindings/input/input.h>
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/soc/rockchip,vop2.h>
 #include "rk3568.dtsi"
@@ -300,6 +298,7 @@
 /* HDMI接口配置 */
 &hdmi {
     status = "okay";
+    ddc-i2c-bus = <&i2c5>;
     avdd-0v9-supply = <&vdda0v9_image>;
     avdd-1v8-supply = <&vcca1v8_image>;
 };
@@ -584,6 +583,10 @@
     };
 };
 
+&i2c5 {
+	status = "okay";
+};
+
 &i2s0_8ch {
     status = "okay";
 };
@@ -650,6 +653,15 @@
 
 &hdmi_sound {
     status = "okay";
+    simple-audio-card,bitclock-master = <&cpu_dai>;
+    simple-audio-card,frame-master = <&cpu_dai>;
+
+    cpu_dai: simple-audio-card,cpu {
+        sound-dai = <&i2s0_8ch>;
+    };
+    simple-audio-card,codec {
+        sound-dai = <&hdmi>;
+    };
 };
 
 /* 温度传感器模数转换器 */
@@ -803,9 +815,6 @@
 
 &usb_host0_xhci {
     status = "okay";
-    phys = <&usb2phy0_otg>, <&combphy0 PHY_TYPE_USB3>;
-    phy-names = "usb2-phy", "usb3-phy";
-    extcon = <&usb2phy0>;
 };
 
 &usb_host1_xhci {
