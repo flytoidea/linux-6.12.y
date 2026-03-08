@@ -13,22 +13,12 @@
         ethernet1 = &gmac1;
         mmc0 = &sdhci;
         mmc1 = &sdmmc2;
-        led-rgb = &ws2812_rgb;
     };
 
     /* 引导参数选择 */
     chosen {
         bootargs = "console=ttyS2,1500000n8 earlycon=uart8250,mmio32,0xfe660000";
         stdout-path = "serial2:1500000n8";
-    };
-
-    ws2812_rgb: rgb-led {
-        compatible = "worldsemi,ws2812-pwm";
-        pwms = <&pwm8 0 1250 0>;
-        num-leds = <10>;
-        color-order = <0>;
-        linux,default-trigger = "none";
-        status = "okay";
     };
 
     gpio-leds {
@@ -107,32 +97,30 @@
         regulator-always-on;
         regulator-min-microvolt = <5000000>;
         regulator-max-microvolt = <5000000>;
-        enable-active-high;
-        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_host_en0>;
         vin-supply = <&dc_12v>;
     };
 
-    vcc5v0_host: vcc5v0-host {
+    vcc5v0_usb2: vcc5v0-usb2-regulator {
         compatible = "regulator-fixed";
-        regulator-name = "vcc5v0_host";
-        regulator-boot-on;
-        regulator-always-on;
+        regulator-name = "vcc5v0_usb2";
+        regulator-min-microvolt = <5000000>;
+        regulator-max-microvolt = <5000000>;
+        enable-active-high;
+        gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vcc5v0_usb2_en>;
+        vin-supply = <&vcc5v0_usb>;
+    };
+
+    vcc5v0_usb3: vcc5v0-usb3 {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc5v0_usb3";
         regulator-min-microvolt = <5000000>;
         regulator-max-microvolt = <5000000>;
         enable-active-high;
         gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
         pinctrl-names = "default";
-        pinctrl-0 = <&vcc5v0_host_en1>;
-        vin-supply = <&vcc5v0_usb>;
-    };
-
-    vcc5v0_otg: vcc5v0-otg {
-        compatible = "regulator-fixed";
-        regulator-name = "vcc5v0_otg";
-        regulator-min-microvolt = <5000000>;
-        regulator-max-microvolt = <5000000>;
+        pinctrl-0 = <&vcc5v0_usb3_en>;
         vin-supply = <&vcc5v0_usb>;
     };
 
@@ -222,8 +210,72 @@
     status = "okay";
 };
 
-&pwm8 {
+/* SPI NOR闪存控制器 */
+&sfc {
     status = "okay";
+};
+
+/* eMMC控制器 */
+&sdhci {
+    bus-width = <8>;
+    max-frequency = <200000000>;
+    non-removable;
+    status = "okay";
+};
+
+/* PCIe 3.0物理层接口 */
+&pcie30phy {
+    status = "okay";
+};
+
+/* PCIe 3.0 x2控制器 */
+&pcie3x2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pcie_reset_pin>;
+    reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
+    vpcie3v3-supply = <&vcc3v3_pcie>;
+    rockchip,init-delay-ms = <100>;
+    status = "okay";
+};
+
+/* SATA2部分 */
+&combphy2 {
+    status = "okay";
+};
+
+&sata2 {
+    status = "okay";
+};
+
+/* SDIO控制器 */
+&sdmmc2 {
+    status = "okay";
+    max-frequency = <25000000>;
+    supports-sdio;
+    bus-width = <4>;
+    disable-wp;
+    cap-sd-highspeed;
+    cap-sdio-irq;
+    keep-power-in-suspend;
+    non-removable;
+    sd-uhs-sdr104;
+    mmc-pwrseq = <&sdio_pwrseq>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdmmc2m0_bus4 &sdmmc2m0_cmd &sdmmc2m0_clk>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    wifi: wifi@1 {
+        reg = <1>;
+        compatible = "brcm,bcm4375-fmac";
+        interrupt-parent = <&gpio3>;
+        interrupts = <RK_PD4 IRQ_TYPE_LEVEL_HIGH>;
+        interrupt-names = "host-wake";
+        pinctrl-names = "default";
+        pinctrl-0 = <&wifi_host_wake_irq>;
+        rockchip,grf = <&grf>;
+        firmware-postfix = "4375";
+    };
 };
 
 /* GMAC以太网控制器 */
@@ -247,8 +299,8 @@
              &gmac0_rgmii_clk
              &gmac0_rgmii_bus>;
 
-    tx_delay = <0x4f>;
-    rx_delay = <0x26>;
+    tx_delay = <0x3c>;
+    rx_delay = <0x2f>;
 
     phy-handle = <&rgmii_phy0>;
     status = "okay";
@@ -281,8 +333,8 @@
              &gmac1m1_rgmii_clk
              &gmac1m1_rgmii_bus>;
 
-    tx_delay = <0x3c>;
-    rx_delay = <0x2f>;
+    tx_delay = <0x4f>;
+    rx_delay = <0x26>;
 
     phy-handle = <&rgmii_phy1>;
     status = "okay";
@@ -293,14 +345,6 @@
         compatible = "ethernet-phy-ieee802.3-c22";
         reg = <0x0>;
     };
-};
-
-/* HDMI接口配置 */
-&hdmi {
-    status = "okay";
-    ddc-i2c-bus = <&i2c5>;
-    avdd-0v9-supply = <&vdda0v9_image>;
-    avdd-1v8-supply = <&vcca1v8_image>;
 };
 
 /* I2C0总线配置 */
@@ -583,16 +627,62 @@
     };
 };
 
-&i2c5 {
-	status = "okay";
-};
-
 &i2s0_8ch {
     status = "okay";
 };
 
 &i2s1_8ch {
     status = "okay";
+};
+
+/* 显示部分 */
+&vop {
+    status = "okay";
+    assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
+    assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
+};
+
+&vop_mmu {
+    status = "okay";
+};
+
+&vp0 {
+    vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
+        reg = <ROCKCHIP_VOP2_EP_HDMI0>;
+        remote-endpoint = <&hdmi_in_vp0>;
+    };
+};
+
+&hdmi {
+    status = "okay";
+    avdd-0v9-supply = <&vdda0v9_image>;
+    avdd-1v8-supply = <&vcca1v8_image>;
+    assigned-resolution = <1440 900 60>;
+};
+
+&hdmi_in {
+    hdmi_in_vp0: endpoint {
+        remote-endpoint = <&vp0_out_hdmi>;
+    };
+};
+
+&hdmi_out {
+    hdmi_out_con: endpoint {
+        remote-endpoint = <&hdmi_con_in>;
+    };
+};
+
+&hdmi_sound {
+    status = "okay";
+    simple-audio-card,bitclock-master = <&cpu_dai>;
+    simple-audio-card,frame-master = <&cpu_dai>;
+
+    cpu_dai: simple-audio-card,cpu {
+        sound-dai = <&i2s0_8ch>;
+    };
+    simple-audio-card,codec {
+        sound-dai = <&hdmi>;
+    };
 };
 
 /* 串口2 */
@@ -622,46 +712,8 @@
     };
 };
 
-&vop {
+&pwm8 {
     status = "okay";
-    assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
-    assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
-};
-
-&vop_mmu {
-    status = "okay";
-};
-
-&vp0 {
-        vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
-                reg = <ROCKCHIP_VOP2_EP_HDMI0>;
-                remote-endpoint = <&hdmi_in_vp0>;
-        };
-};
-
-&hdmi_in {
-    hdmi_in_vp0: endpoint {
-        remote-endpoint = <&vp0_out_hdmi>;
-    };
-};
-
-&hdmi_out {
-    hdmi_out_con: endpoint {
-        remote-endpoint = <&hdmi_con_in>;
-    };
-};
-
-&hdmi_sound {
-    status = "okay";
-    simple-audio-card,bitclock-master = <&cpu_dai>;
-    simple-audio-card,frame-master = <&cpu_dai>;
-
-    cpu_dai: simple-audio-card,cpu {
-        sound-dai = <&i2s0_8ch>;
-    };
-    simple-audio-card,codec {
-        sound-dai = <&hdmi>;
-    };
 };
 
 /* 温度传感器模数转换器 */
@@ -678,45 +730,6 @@
 /* 硬件随机数生成器 */
 &rng {
     status = "okay";
-};
-
-/* eMMC控制器 */
-&sdhci {
-    bus-width = <8>;
-    max-frequency = <200000000>;
-    non-removable;
-    status = "okay";
-};
-
-/* SDIO控制器 */
-&sdmmc2 {
-    status = "okay";
-    max-frequency = <25000000>;
-    supports-sdio;
-    bus-width = <4>;
-    disable-wp;
-    cap-sd-highspeed;
-    cap-sdio-irq;
-    keep-power-in-suspend;
-    non-removable;
-    sd-uhs-sdr104;
-    mmc-pwrseq = <&sdio_pwrseq>;
-    pinctrl-names = "default";
-    pinctrl-0 = <&sdmmc2m0_bus4 &sdmmc2m0_cmd &sdmmc2m0_clk>;
-    #address-cells = <1>;
-    #size-cells = <0>;
-
-    wifi: wifi@1 {
-        reg = <1>;
-        compatible = "brcm,bcm4375-fmac";
-        interrupt-parent = <&gpio3>;
-        interrupts = <RK_PD4 IRQ_TYPE_LEVEL_HIGH>;
-        interrupt-names = "host-wake";
-        pinctrl-names = "default";
-        pinctrl-0 = <&wifi_host_wake_irq>;
-        rockchip,grf = <&grf>;
-        firmware-postfix = "4375";
-    };
 };
 
 /* 引脚控制器配置 */
@@ -774,10 +787,10 @@
 
     /* USB电源引脚配置 */
     usb {
-        vcc5v0_host_en0: vcc5v0-host-en0 {
+        vcc5v0_usb2_en: vcc5v0-usb2-en {
             rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
         };
-        vcc5v0_host_en1: vcc5v0-host-en1 {
+        vcc5v0_usb3_en: vcc5v0-usb3-en {
             rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
         };
     };
@@ -795,15 +808,6 @@
     };
 };
 
-/* SATA2部分 */
-&combphy2 {
-    status = "okay";
-};
-
-&sata2 {
-    status = "okay";
-};
-
 /* USB部分 */
 &combphy0 {
     status = "okay";
@@ -815,6 +819,7 @@
 
 &usb_host0_xhci {
     status = "okay";
+    dr_mode = "host";
 };
 
 &usb_host1_xhci {
@@ -822,22 +827,22 @@
 };
 
 &usb2phy0_host {
-    phy-supply = <&vcc5v0_host>;
+    phy-supply = <&vcc5v0_usb3>;
     status = "okay";
 };
 
 &usb2phy0_otg {
-    phy-supply = <&vcc5v0_otg>;
+    phy-supply = <&vcc5v0_usb2>;
     status = "okay";
 };
 
 &usb2phy1_host {
-    phy-supply = <&vcc5v0_host>;
+    phy-supply = <&vcc5v0_usb3>;
     status = "okay";
 };
 
 &usb2phy1_otg {
-    phy-supply = <&vcc5v0_host>;
+    phy-supply = <&vcc5v0_usb2>;
     status = "okay";
 };
 
@@ -862,25 +867,5 @@
 };
 
 &usb_host1_ohci {
-    status = "okay";
-};
-
-/* SPI NOR闪存控制器 */
-&sfc {
-    status = "okay";
-};
-
-/* PCIe 3.0物理层接口 */
-&pcie30phy {
-    status = "okay";
-};
-
-/* PCIe 3.0 x2控制器 */
-&pcie3x2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pcie_reset_pin>;
-    reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
-    vpcie3v3-supply = <&vcc3v3_pcie>;
-    rockchip,init-delay-ms = <100>;
     status = "okay";
 };
